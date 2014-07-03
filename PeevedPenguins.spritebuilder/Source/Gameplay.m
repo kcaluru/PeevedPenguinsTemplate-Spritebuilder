@@ -11,12 +11,24 @@
 @implementation Gameplay {
     CCPhysicsNode *_physicsNode;
     CCNode *_catapultArm;
+    CCNode *_levelNode;
+    CCNode *_contentNode;
+    CCNode *_pullbackNode;
 }
 
 // is called when CCB file has completed loading
 - (void)didLoadFromCCB {
     // tell this scene to accept touches
     self.userInteractionEnabled = TRUE;
+    
+    CCScene *level = [CCBReader loadAsScene:@"Levels/Level1"];
+    [_levelNode addChild:level];
+    
+    // visualize physics bodies & joints
+    _physicsNode.debugDraw = TRUE;
+    
+    // nothing shall collide with our invisible nodes
+    _pullbackNode.physicsBody.collisionMask = @[];
 }
 
 // called on every touch in this scene
@@ -37,6 +49,16 @@
     CGPoint launchDirection = ccp(1, 0);
     CGPoint force = ccpMult(launchDirection, 8000);
     [penguin.physicsBody applyForce:force];
+    
+    // ensure followed object is in visible are when starting
+    // ensure followed object is in visible are when starting
+    self.position = ccp(0, 0);
+    CCActionFollow *follow = [CCActionFollow actionWithTarget:penguin worldBoundary:self.boundingBox];
+    [_contentNode runAction:follow];}
+
+- (void)retry {
+    // reload this level
+    [[CCDirector sharedDirector] replaceScene: [CCBReader loadAsScene:@"Gameplay"]];
 }
 
 @end
